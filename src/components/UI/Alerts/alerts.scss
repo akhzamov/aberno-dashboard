@@ -1,0 +1,44 @@
+.info-alert {
+	background: $info-bg-color;
+	color: $info-color;
+	border-radius: 8px;
+	border: 1px solid $info-color;
+	animation: animAlert 0.3s linear forwards;
+	width: max-content;
+}
+
+.warning-alert {
+	background: $warning-bg-color;
+	color: $warning-color;
+	border-radius: 8px;
+	border: 1px solid $warning-color;
+	animation: animAlert 0.3s linear forwards;
+	width: max-content;
+}
+
+.danger-alert {
+	background: $danger-bg-color;
+	color: $danger-color;
+	border-radius: 8px;
+	border: 1px solid $danger-color;
+	animation: animAlert 0.3s linear forwards;
+	width: max-content;
+}
+
+.success-alert {
+	background: $success-bg-color;
+	color: $success-color;
+	border-radius: 8px;
+	border: 1px solid $success-color;
+	animation: animAlert 0.3s linear forwards;
+	width: max-content;
+}
+
+@keyframes animAlert {
+	0% {
+		scale: 0;
+	}
+	100% {
+		scale: 1;
+	}
+}

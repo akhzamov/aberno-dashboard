@@ -1,0 +1,229 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import './variables.scss';
+@import './fonts.scss';
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: $mainFont;
+	font-size: $mainFontSize;
+	font-weight: $mainFontWeight;
+	background: $body-bg-color;
+	color: $main-text-color;
+}
+
+.wrapper {
+	width: 100%;
+	height: 100vh;
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+	/* ширина всей полосы прокрутки */
+}
+
+::-webkit-scrollbar-track {
+	background: $default-color;
+	/* цвет зоны отслеживания */
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: $primary-color;
+	/* цвет бегунка */
+	border-radius: 12px;
+	/* округлость бегунка */
+}
+
+input,
+textarea,
+select,
+button {
+	background: transparent;
+	outline: none;
+}
+
+a {
+	text-decoration: none;
+}
+
+ul,
+li {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+@mixin media($size) {
+	@media (max-width: #{$size}px) {
+		@content;
+	}
+}
+
+.container {
+	max-width: 1320px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+@include media(1440) {
+	.container {
+		max-width: 1280px;
+	}
+}
+
+.input-group {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+
+	&__label {
+		color: $main-text-color;
+		font-weight: 500;
+		font-size: 14px;
+		line-height: normal;
+		margin-bottom: 5px;
+	}
+
+	&__span {
+		height: 18px;
+		visibility: hidden;
+		color: $danger-color;
+		font-weight: 400;
+		font-size: 10px;
+		line-height: normal;
+		text-transform: uppercase;
+		margin: 5px;
+
+		&.active {
+			visibility: visible;
+		}
+	}
+
+	&__input {
+		width: 100%;
+		border: 1px solid #d0d5dd;
+		box-shadow: 0px 1px 2px 0px #1018280d;
+		background: $default-color;
+		border-radius: 4px;
+		padding: 12px 16px;
+		color: $secondary-text-color;
+
+		&::placeholder {
+			color: $secondary-text-color;
+		}
+	}
+}
+
+.textarea-group {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+
+	&__label {
+		color: $main-text-color;
+		font-weight: 500;
+		font-size: 14px;
+		line-height: normal;
+		margin-bottom: 5px;
+	}
+
+	&__span {
+		height: 18px;
+		visibility: hidden;
+		color: $danger-color;
+		font-weight: 400;
+		font-size: 10px;
+		line-height: normal;
+		text-transform: uppercase;
+		margin: 5px;
+
+		&.active {
+			visibility: visible;
+		}
+	}
+
+	&__textarea {
+		resize: none;
+		width: 100%;
+		border: 1px solid #d0d5dd;
+		box-shadow: 0px 1px 2px 0px #1018280d;
+		background: $secondary-text-color;
+		border-radius: 8px;
+		padding: 10px 10px;
+		color: $neutral-regular;
+		&::placeholder {
+			color: $secondary-text-color;
+		}
+	}
+}
+
+.button {
+	padding: 0 100px;
+	height: 45px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0px 1px 2px 0px #1018280d;
+	border: 1px solid #d0d5dd;
+	border-radius: 8px;
+	text-align: center;
+	text-wrap: nowrap;
+	cursor: pointer;
+
+	&.close {
+		background: $default-color;
+		border: 1px solid #d0d5dd;
+		color: $main-text-color;
+	}
+
+	&.send {
+		background: $primary-color;
+		color: $default-color;
+		border: 1px solid $primary-color;
+	}
+
+	&.danger {
+		background: $danger-color;
+		color: $default-color;
+		border: 1px solid $danger-color;
+	}
+}
+
+.title-black-gl {
+	color: $main-text-color;
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.5;
+}
+
+.section {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+
+	&__content {
+		margin-top: 20px;
+		width: 100%;
+		flex-grow: 1;
+		background: $default-color;
+		border-radius: 6px;
+		box-shadow: 0px 1px 4px 0px rgba(21, 34, 50, 0.08);
+		overflow-y: auto;
+	}
+}
+
+@import './common.scss';

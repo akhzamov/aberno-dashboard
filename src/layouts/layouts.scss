@@ -1,0 +1,18 @@
+.auth-layout {
+	width: 100%;
+	height: 100%;
+	background: $primary-color;
+}
+
+.default-layout {
+	display: flex;
+	width: 100%;
+	height: 100%;
+
+	&__main {
+		height: 100%;
+		width: 100%;
+		flex-grow: 1;
+		padding: 30px 40px;
+	}
+}

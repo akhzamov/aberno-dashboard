@@ -1,0 +1,84 @@
+.aside {
+	width: 250px;
+	height: 100%;
+	background: #f5f6fa;
+	box-shadow: -1px 0px 0px 0px #d7dbec inset;
+	padding: 20px 10px 20px 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+
+	&__list {
+		width: 100%;
+		height: max-content;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: flex-start;
+		gap: 5px;
+
+		&-item {
+			width: 100%;
+			height: 50px;
+			padding-right: 10px;
+		}
+
+		&-link {
+			width: 100%;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			gap: 15px;
+
+			&-line {
+				width: 5px;
+				height: 100%;
+				border-radius: 0 4px 4px 0;
+				background: transparent;
+				transition: all 0.15s linear;
+			}
+
+			&-content {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				gap: 15px;
+				padding-left: 20px;
+				border-radius: 6px;
+				transition: all 0.15s linear;
+			}
+
+			&:hover,
+			&.router-link-active {
+				& .aside__list-link-line {
+					background: $info-color;
+
+					&.danger {
+						background: $danger-color;
+					}
+				}
+
+				& .aside__list-link-content {
+					background: $info-color;
+					color: $default-color;
+
+					&.danger {
+						background: $danger-color;
+					}
+				}
+			}
+		}
+	}
+
+	&__line {
+		display: block;
+		margin: 20px 0;
+		width: 240px;
+		height: 1px;
+		background: #e0e0e0;
+	}
+}
