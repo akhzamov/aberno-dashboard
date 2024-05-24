@@ -1,0 +1,124 @@
+.modal-success {
+	&__title {
+		color: $main-text-color;
+		font-size: 20px;
+	}
+
+	&__text {
+		color: secondary-text-color;
+		font-size: 16px;
+	}
+
+	&__button {
+		width: 100%;
+		background: $success-bg-color;
+		color: $success-color;
+		border: none;
+		transition: 0.1s linear;
+
+		&:focus {
+			scale: 0.95;
+		}
+	}
+
+	&__icon {
+		background: $success-bg-color;
+
+		&-item {
+			color: $success-color;
+		}
+	}
+}
+.modal-danger {
+	&__title {
+		color: $main-text-color;
+		font-size: 20px;
+	}
+
+	&__text {
+		color: secondary-text-color;
+		font-size: 16px;
+	}
+
+	&__button {
+		width: 100%;
+		background: $danger-bg-color;
+		color: $danger-color;
+		border: none;
+		transition: 0.1s linear;
+
+		&:focus {
+			scale: 0.95;
+		}
+	}
+
+	&__icon {
+		background: $danger-bg-color;
+
+		&-item {
+			color: $danger-color;
+		}
+	}
+}
+.modal-info {
+	&__title {
+		color: $main-text-color;
+		font-size: 20px;
+	}
+
+	&__text {
+		color: secondary-text-color;
+		font-size: 16px;
+	}
+
+	&__button {
+		width: 100%;
+		background: $info-bg-color;
+		color: $info-color;
+		border: none;
+		transition: 0.1s linear;
+
+		&:focus {
+			scale: 0.95;
+		}
+	}
+
+	&__icon {
+		background: $info-bg-color;
+
+		&-item {
+			color: $info-color;
+		}
+	}
+}
+.modal-warning {
+	&__title {
+		color: $main-text-color;
+		font-size: 20px;
+	}
+
+	&__text {
+		color: secondary-text-color;
+		font-size: 16px;
+	}
+
+	&__button {
+		width: 100%;
+		background: $warning-bg-color;
+		color: $warning-color;
+		border: none;
+		transition: 0.1s linear;
+
+		&:focus {
+			scale: 0.95;
+		}
+	}
+
+	&__icon {
+		background: $warning-bg-color;
+
+		&-item {
+			color: $warning-color;
+		}
+	}
+}

@@ -41,10 +41,7 @@ watch(size, () => {
     :viewBox="viewBox"
     ref="svgElement"
   >
-    <path
-      fill="currentColor"
-      d="M7 17h2v-7H7zm4 0h2V7h-2zm4 0h2v-4h-2zM3 21V3h18v18zm2-2h14V5H5zm0 0V5z"
-    />
+    <path :fill="color" d="M6 13h12v-2H6M3 6v2h18V6M10 18h4v-2h-4z" />
   </svg>
 </template>
 

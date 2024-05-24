@@ -1,8 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import './variables.scss';
-@import './fonts.scss';
+@import "./variables.scss";
+@import "./fonts.scss";
 
 * {
 	margin: 0;
@@ -21,6 +21,29 @@ body {
 .wrapper {
 	width: 100%;
 	height: 100vh;
+}
+
+.loader-wrap {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.6);
+}
+
+.alert-wrap {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-end;
 }
 
 ::-webkit-scrollbar {
@@ -171,7 +194,7 @@ li {
 }
 
 .button {
-	padding: 0 100px;
+	padding: 0 25px;
 	height: 45px;
 	display: flex;
 	align-items: center;
@@ -182,6 +205,11 @@ li {
 	text-align: center;
 	text-wrap: nowrap;
 	cursor: pointer;
+	transition: 0.1s linear;
+
+	&:hover {
+		scale: 0.95;
+	}
 
 	&.close {
 		background: $default-color;
@@ -199,6 +227,12 @@ li {
 		background: $danger-color;
 		color: $default-color;
 		border: 1px solid $danger-color;
+	}
+
+	&.default {
+		background: $default-color;
+		color: $primary-color;
+		border: 1px solid #d0d5dd;
 	}
 }
 
@@ -223,7 +257,182 @@ li {
 		border-radius: 6px;
 		box-shadow: 0px 1px 4px 0px rgba(21, 34, 50, 0.08);
 		overflow-y: auto;
+
+		&-tabs {
+			padding-bottom: 10px;
+			border-bottom: 1px solid $secondary-text-color;
+			margin-bottom: 20px;
+
+			&-list {
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				gap: 25px;
+
+				&-item {
+					display: inline;
+					color: $main-text-color;
+					font-size: 20px;
+					font-weight: 400;
+					line-height: 1.5;
+					cursor: pointer;
+					position: relative;
+
+					& span {
+						display: none;
+						width: 100%;
+						height: 2px;
+						background: $primary-color;
+						position: absolute;
+						bottom: -10px;
+						left: 0;
+					}
+
+					&.active {
+						& span {
+							display: inline-block;
+						}
+					}
+				}
+			}
+		}
+
+		&-filter {
+			height: 50px;
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			gap: 30px;
+
+			&-select {
+				width: 210px;
+				height: 100%;
+
+				& select {
+					height: 100%;
+					border-radius: 4px;
+					border: 1px solid #d9e1ec;
+					background: #fff;
+					color: $main-text-color;
+					padding-left: 15px;
+					appearance: none;
+					background-image: url("@/assets/img/filter-icon.svg");
+					background-repeat: no-repeat;
+					background-position: right 15px top 50%;
+
+					&:focus {
+						border-color: $primary-color;
+					}
+				}
+			}
+
+			&-input {
+				width: 350px;
+				height: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: flex-start;
+				padding: 0 0 0 15px;
+				border-radius: 4px;
+				border: 1px solid #d9e1ec;
+				background: #fff;
+				gap: 8px;
+
+				& input {
+					height: 100%;
+					flex-grow: 1;
+					color: #7e84a3;
+					font-size: 16px;
+					font-weight: 400;
+					line-height: 1.5;
+					&::placeholder {
+						color: #a1a7c4;
+					}
+				}
+			}
+
+			& .button {
+				gap: 10px;
+				font-size: 16px;
+			}
+		}
+
+		&-views {
+			margin-top: 20px;
+		}
+
+		&-table {
+			& table {
+				background: $default-color;
+				color: $main-text-color;
+
+				& thead {
+					background: $default-color;
+					color: $main-text-color;
+					border-bottom: 2px solid #e6e9f4;
+				}
+
+				& tbody {
+					background: $default-color;
+					color: $main-text-color;
+
+					& tr {
+						border-bottom: 1px solid #e6e9f4;
+						transition: 0.2s linear;
+						cursor: pointer;
+						position: relative;
+
+						&:hover {
+							background: $info-bg-color;
+						}
+
+						& a {
+							position: absolute;
+							width: 100%;
+							height: 100%;
+							top: 0;
+							left: 0;
+						}
+					}
+				}
+			}
+		}
+
+		&-status {
+			width: max-content;
+			padding: 5px 5px;
+			border-radius: 2px;
+			text-align: center;
+			font-size: 14px;
+			font-weight: 400;
+			line-height: 1.42;
+
+			&.success {
+				background: $success-bg-color;
+				color: $success-color;
+			}
+
+			&.danger {
+				background: $danger-bg-color;
+				color: $danger-color;
+			}
+
+			&.info {
+				background: $info-bg-color;
+				color: $info-color;
+			}
+
+			&.warning {
+				background: $warning-bg-color;
+				color: $warning-color;
+			}
+
+			&.stable {
+				background: $stable-bg-color;
+				color: $stable-color;
+			}
+		}
 	}
 }
 
-@import './common.scss';
+@import "./common.scss";

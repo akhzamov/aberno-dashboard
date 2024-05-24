@@ -42,8 +42,8 @@ watch(size, () => {
     ref="svgElement"
   >
     <path
-      fill="currentColor"
-      d="M7 17h2v-7H7zm4 0h2V7h-2zm4 0h2v-4h-2zM3 21V3h18v18zm2-2h14V5H5zm0 0V5z"
+      :fill="color"
+      d="M232.49 215.51L185 168a92.12 92.12 0 1 0-17 17l47.53 47.54a12 12 0 0 0 17-17ZM44 112a68 68 0 1 1 68 68a68.07 68.07 0 0 1-68-68"
     />
   </svg>
 </template>
