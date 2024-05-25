@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useGlobalStore, useLoaderWatcher } from "@/stores/global";
 import { useAuthStore } from "@/stores/auth";
 import { useModalStore } from "@/stores/modals";
 import type { IEmployee } from "@/Interfaces/user.interface";
 import { fetchEmployees } from "./allUsers.data";
 import Pagination from "@/components/UI/Pagination/Pagination.vue";
+import { debounce } from "@/api";
 
 const globalStore = useGlobalStore();
 const authStore = useAuthStore();
@@ -13,17 +14,39 @@ const modalStore = useModalStore();
 const employees = ref<IEmployee[]>([]);
 const error = ref<string | null>(null);
 const total = ref(0);
-const totalPages = ref(6);
-const perPage = ref(10);
+const perPage = ref(6);
 const currentPage = ref(1);
-const hasMorePages = ref(true);
+const maxVisibleButtons = ref(4);
 
 useLoaderWatcher();
 
+const debouncedFetchEmployees = debounce(
+  async (currentPage: number, perPage: number) => {
+    const response = await fetchEmployees(currentPage, perPage);
+    employees.value = response.data;
+    total.value = response.count;
+  },
+  300
+);
+
+watch(
+  () => globalStore.searchUsers,
+  async (newValue: string) => {
+    if (newValue.trim() !== "") {
+      debouncedFetchEmployees(currentPage.value, perPage.value);
+    } else {
+      globalStore.searchUsers = "";
+      const res = await fetchEmployees(currentPage.value, perPage.value);
+      employees.value = res.data;
+      total.value = res.count;
+    }
+  },
+  { immediate: true }
+);
 onMounted(async () => {
   globalStore.setLoading(true);
   try {
-    const response = await fetchEmployees(currentPage.value, totalPages.value);
+    const response = await fetchEmployees(currentPage.value, perPage.value);
     employees.value = response.data;
 
     total.value = response.count;
@@ -38,7 +61,7 @@ const handlePageChange = async (page: number) => {
   globalStore.setLoading(true);
   currentPage.value = page;
   try {
-    const response = await fetchEmployees(currentPage.value, totalPages.value);
+    const response = await fetchEmployees(currentPage.value, perPage.value);
     employees.value = response.data;
     total.value = response.count;
   } catch (err) {
@@ -77,7 +100,11 @@ const handlePageChange = async (page: number) => {
       </div>
       <div class="section__content-filter-input">
         <img src="@/assets/img/magnify.svg" alt="" />
-        <input type="text" placeholder="Поиск..." />
+        <input
+          type="text"
+          placeholder="Поиск..."
+          v-model="globalStore.searchUsers"
+        />
       </div>
       <RouterLink
         :to="{
@@ -106,7 +133,13 @@ const handlePageChange = async (page: number) => {
               <th scope="col" class="px-6 py-3">Дата изменение</th>
             </tr>
           </thead>
+
           <tbody>
+            <tr v-if="employees.length == 0">
+              <th scope="row" class="px-6 py-4 font-medium flex flex-col">
+                Ничего не найдено
+              </th>
+            </tr>
             <tr v-for="employee in employees" :key="employee.id">
               <RouterLink
                 :to="{
@@ -132,6 +165,7 @@ const handlePageChange = async (page: number) => {
                   }}
                 </span>
               </th>
+
               <td class="px-6 py-4 statuses">
                 <span
                   class="section__content-status success"
@@ -163,11 +197,10 @@ const handlePageChange = async (page: number) => {
         </table>
       </div>
       <Pagination
-        :totalPages="totalPages"
+        :maxVisibleButtons="maxVisibleButtons"
         :total="total"
         :perPage="perPage"
         :currentPage="currentPage"
-        :hasMorePages="hasMorePages"
         @pagechanged="handlePageChange"
       />
     </div>

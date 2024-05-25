@@ -3,14 +3,14 @@ import { defineComponent } from "vue";
 import Development from "@/components/Development/Development.vue";
 
 defineComponent({
-  name: "Report",
+  name: "HR",
 });
 </script>
 
 <template>
-  <section class="report section">
-    <h1 class="report__title title-black-gl">Отчет</h1>
-    <div class="report__content section__content">
+  <section class="hr section">
+    <h1 class="hr__title title-black-gl">HR</h1>
+    <div class="hr__content section__content">
       <Development />
     </div>
   </section>

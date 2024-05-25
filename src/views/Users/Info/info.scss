@@ -1,0 +1,11 @@
+.user-info {
+  &__content {
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+
+    &-table {
+      margin-top: 20px;
+    }
+  }
+}

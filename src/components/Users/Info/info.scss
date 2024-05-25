@@ -1,0 +1,44 @@
+.user-info {
+  &__content {
+    &-title {
+      color: $main-text-color;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+  }
+
+  &__details {
+    padding: 30px;
+    .text-primary-color {
+      color: $primary-color;
+    }
+
+    button {
+      background-color: $danger-bg-color;
+      color: $danger-color;
+      &:hover {
+        background-color: darken($danger-bg-color, 10%);
+      }
+    }
+  }
+
+  &__history table {
+    th {
+      background-color: $default-color;
+      color: $main-text-color;
+      border-bottom-width: 2px;
+      border-bottom-color: #e6e9f4;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e6e9f4;
+    }
+
+    tbody tr:hover {
+      background-color: $info-bg-color;
+    }
+  }
+}

@@ -25,13 +25,14 @@ export const getEmployeeByID = async (id: number): Promise<IEmployee> => {
   }
 };
 export const editEmployee = async (
-  employeeData: IEmployeeData
+  employeeData: IEmployeeData,
+  id: number
 ): Promise<IEmployee> => {
   const globalStore = useGlobalStore();
   globalStore.setLoading(true);
   try {
-    const response = await axios.post<IEmployee>(
-      `${baseUrl}/admin/employees`,
+    const response = await axios.put<IEmployee>(
+      `${baseUrl}/admin/employees/${id}`,
       { ...employeeData },
       {
         headers: {

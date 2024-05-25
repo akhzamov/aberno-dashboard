@@ -1,27 +1,51 @@
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useGlobalStore, useLoaderWatcher } from "@/stores/global";
 import { useModalStore } from "@/stores/modals";
 import type { IEmployee } from "@/Interfaces/user.interface";
 import { fetchModers } from "./allModers.data";
 import Pagination from "@/components/UI/Pagination/Pagination.vue";
+import { debounce } from "@/api";
 
 const globalStore = useGlobalStore();
 const modalStore = useModalStore();
 const moders = ref<IEmployee[]>([]);
 const error = ref<string | null>(null);
 const total = ref(0);
-const totalPages = ref(8);
-const perPage = ref(10);
+const perPage = ref(6);
 const currentPage = ref(1);
-const hasMorePages = ref(true);
+const maxVisibleButtons = ref(4);
 
 useLoaderWatcher();
+
+const debouncedFetchEmployees = debounce(
+  async (currentPage: number, perPage: number) => {
+    const response = await fetchModers(currentPage, perPage);
+    moders.value = response.data;
+    total.value = response.count;
+  },
+  300
+);
+
+watch(
+  () => globalStore.searchModers,
+  async (newValue: string) => {
+    if (newValue.trim() !== "") {
+      debouncedFetchEmployees(currentPage.value, perPage.value);
+    } else {
+      globalStore.searchModers = "";
+      const res = await fetchModers(currentPage.value, perPage.value);
+      moders.value = res.data;
+      total.value = res.count;
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(async () => {
   globalStore.setLoading(true);
   try {
-    const response = await fetchModers(currentPage.value, totalPages.value);
+    const response = await fetchModers(currentPage.value, perPage.value);
     moders.value = response.data;
 
     total.value = response.count;
@@ -36,7 +60,7 @@ const handlePageChange = async (page: number) => {
   globalStore.setLoading(true);
   currentPage.value = page;
   try {
-    const response = await fetchModers(currentPage.value, totalPages.value);
+    const response = await fetchModers(currentPage.value, perPage.value);
     moders.value = response.data;
     total.value = response.count;
   } catch (err) {
@@ -69,13 +93,18 @@ const handlePageChange = async (page: number) => {
     <div class="section__content-filter">
       <div class="section__content-filter-select">
         <select id="countries" class="block w-full">
-          <option selected>Choose a country</option>
+          <option value="" selected>Все</option>
+          <option value="A">Choose a country</option>
           <option value="US">United States</option>
         </select>
       </div>
       <div class="section__content-filter-input">
         <img src="@/assets/img/magnify.svg" alt="" />
-        <input type="text" placeholder="Поиск..." />
+        <input
+          type="text"
+          placeholder="Поиск..."
+          v-model="globalStore.searchModers"
+        />
       </div>
       <RouterLink
         :to="{
@@ -127,8 +156,8 @@ const handlePageChange = async (page: number) => {
                     : `${moder.user.name} ${moder.user.last_name}`
                 }}
                 <span>
-                  {{ moder.department.name }}
-                  {{ moder.position ? moder.position.name : "Не определено" }}
+                  {{ moder.department ? moder.department.name : " " }}
+                  {{ moder.position ? moder.position.name : " " }}
                 </span>
               </th>
               <th scope="row" class="px-6 py-4 font-medium">
@@ -172,11 +201,10 @@ const handlePageChange = async (page: number) => {
         </table>
       </div>
       <Pagination
-        :totalPages="totalPages"
+        :maxVisibleButtons="maxVisibleButtons"
         :total="total"
         :perPage="perPage"
         :currentPage="currentPage"
-        :hasMorePages="hasMorePages"
         @pagechanged="handlePageChange"
       />
     </div>

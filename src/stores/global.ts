@@ -25,6 +25,8 @@ export const useGlobalStore = defineStore("global", {
     positions: [] as IPosition[] | null,
     departments: [] as IDepartment[] | null,
     roles: [] as IRole[] | null,
+    searchUsers: "",
+    searchModers: "",
   }),
   actions: {
     setLoading(status: boolean) {

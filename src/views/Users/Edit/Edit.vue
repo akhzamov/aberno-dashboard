@@ -3,16 +3,21 @@ import { useRoute } from "vue-router";
 import { computed, onMounted, reactive } from "vue";
 import { editEmployee, getEmployeeByID } from "./edit.data";
 import { useGlobalStore } from "@/stores/global";
+import { useAuthStore } from "@/stores/auth";
+import { useModalStore } from "@/stores/modals";
 import { useForm } from "vee-validate";
 import * as yup from "yup";
+import type { IEmployeeData } from "@/Interfaces/user.interface";
 import {
   getDepartments,
   getPositions,
   getRoles,
 } from "@/views/Users/users.data";
-import type { IRole } from "@/Interfaces/user.interface";
+import router from "@/router";
 
 const globalStore = useGlobalStore();
+const authStore = useAuthStore();
+const modalStore = useModalStore();
 
 interface IUserData {
   title: string;
@@ -30,105 +35,130 @@ const userData = computed<IUserData>(() => {
   return window.history.state?.userData || defaultUserData;
 });
 
-interface ISchemaForm {
-  name: string;
-  last_name: string;
-  username: string;
-  password: string;
-  department_id: number | string;
-  position_id: number | string;
-  role_id: number;
-  phone: string;
-}
-
 const schema = yup.object({
-  name: yup
+  firstName: yup
     .string()
     .required("Введите имя")
-    .min(3, "Имя не должена быть меньше 3-ех символов"),
-  last_name: yup
+    .min(3, "Имя не должно быть меньше 3-х символов"),
+  lastName: yup
     .string()
     .required("Введите фамилию")
-    .min(6, "Фамилия не должена быть меньше 3-ех символов"),
+    .min(3, "Фамилия не должна быть меньше 3-х символов"),
   username: yup
     .string()
     .required("Введите логин")
-    .min(5, "Логин не должен быть меньше 5-ех символов"),
+    .min(5, "Логин не должен быть меньше 5-ти символов")
+    .nullable(),
   password: yup
     .string()
-    .required("Введите пароль")
-    .min(6, "Пароль не должен быть меньше 6-и символов"),
-  department_id: yup.string().required("Выберите отдел"),
-  position_id: yup.string().required("Выберите должность"),
-  role_id: yup.string().required("Выберите роль"),
+    .notRequired()
+    .min(6, "Пароль не должен быть меньше 6-ти символов"),
+  departmentID: yup.number().nullable().required("Выберите отдел").default(1),
+  positionID: yup.number().nullable().required("Выберите должность").default(1),
+  roleID: yup.number().nullable().required("Выберите роль").default(0),
   phone: yup
     .string()
     .required("Введите номер телефона")
-    .min(6, "Пароль не должен быть меньше 6-и символов"),
+    .min(6, "Номер телефона не должен быть меньше 6-ти символов"),
 });
 
-const { values, handleSubmit, meta, handleReset, defineField, errors } =
-  useForm<ISchemaForm>({
-    validationSchema: schema,
-  });
+interface ISchemaForm {
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  departmentID: number | null;
+  positionID: number | null;
+  roleID: number | null;
+  phone: string;
+}
 
-const [name, nameAttrs] = defineField("name");
-const [last_name, last_nameAttrs] = defineField("last_name");
+const { handleSubmit, defineField, errors } = useForm<ISchemaForm>({
+  validationSchema: schema,
+});
+const [firstName, firstNameAttrs] = defineField("firstName");
+const [lastName, lastNameAttrs] = defineField("lastName");
 const [username, usernameAttrs] = defineField("username");
 const [password, passwordAttrs] = defineField("password");
-const [department_id, department_idAttrs] = defineField("department_id");
-const [position_id, position_idAttrs] = defineField("position_id");
-const [role_id, role_idAttrs] = defineField("role_id");
+const [departmentID, departmentIDAttrs] = defineField("departmentID");
+const [positionID, positionIDAttrs] = defineField("positionID");
+const [roleID, roleIDAttrs] = defineField("roleID");
 const [phone, phoneAttrs] = defineField("phone");
 
-const onSubmit = handleSubmit(async () => {
-  let submitForm = {
-    name: name.value,
-    last_name: last_name.value,
-    username: username.value,
-    password: password.value,
-    password_confirmation: password.value,
-    position_id: Number(position_id.value),
-    phone: phone.value,
-    department_id: Number(department_id.value),
-    organization_id: Number(1),
-    role_id: userData.value.admin ? Number(role_id.value) : Number(0),
+const onSubmit = handleSubmit(async (values) => {
+  const submitForm: IEmployeeData = {
+    name: values.firstName,
+    last_name: values.lastName,
+    username: values.username,
+    password: values.password,
+    password_confirmation: values.password,
+    department_id: values.departmentID ?? 1,
+    position_id: values.positionID ?? 1,
+    role_id: userData.value.admin ? Number(values.roleID) : 0,
+    phone: values.phone,
+    organization_id: authStore.organizationID ?? 1,
   };
 
-  console.log(submitForm);
+  globalStore.setLoading(true);
 
-  // try {
-  //   const response = await editEmployee(submitForm);
-  //   console.log(response);
-  //   console.log("User created successfully:", response);
-  // } catch (error) {
-  //   console.error("Error creating user:", error);
-  // }
+  try {
+    const response = await editEmployee(submitForm, userData.value.id);
+    router.push("/users");
+    globalStore.setLoading(false);
+    modalStore.successModal = true;
+    modalStore.successModalText = userData.value.admin
+      ? "Новый модератор создан!"
+      : "Новый пользователь создан";
+    setTimeout(() => {
+      modalStore.successModal = false;
+      modalStore.successModalText = "";
+    }, 3500);
+  } catch (error: any) {
+    if (error?.response?.data?.detail === "Username is already taken") {
+      globalStore.setLoading(false);
+      modalStore.warningModal = true;
+      modalStore.warningModalText =
+        "Пользователь с таким логином уже существует";
+      setTimeout(() => {
+        modalStore.warningModal = false;
+        modalStore.warningModalText = "";
+      }, 3500);
+    } else {
+      globalStore.setLoading(false);
+      modalStore.dangerModal = true;
+      modalStore.dangerModalText = "Не удалось создать пользователя";
+      setTimeout(() => {
+        modalStore.dangerModal = false;
+        modalStore.dangerModalText = "";
+      }, 3500);
+      router.push("/users");
+    }
+  }
 });
 
 onMounted(async () => {
-  getDepartments();
-  getPositions();
-  getRoles();
-
-  const res = await getEmployeeByID(userData.value.id);
-  const roles = res.user.roles;
-
-  console.log(res);
-
-  name.value = res.user.name;
-  last_name.value = res.user.last_name ? res.user.last_name : "";
-  username.value = res.user.username;
-  res.department
-    ? (department_id.value = res.department.id)
-    : (department_id.value = "");
-  res.position
-    ? (position_id.value = res.position.id)
-    : (position_id.value = "");
-  userData.value.admin && roles.length > 0
-    ? (role_id.value = roles[roles.length - 1].id)
-    : (role_id.value = 0);
-  phone.value = res.phone;
+  try {
+    await getDepartments();
+    await getPositions();
+    await getRoles();
+    const res = await getEmployeeByID(userData.value.id);
+    const roles = res.user.roles;
+    firstName.value = res.user.name;
+    lastName.value = res.user.last_name ? res.user.last_name : "";
+    username.value = res.user.username;
+    res.department
+      ? (departmentID.value = res.department.id)
+      : (departmentID.value = 2);
+    res.position
+      ? (positionID.value = res.position.id)
+      : (positionID.value = 2);
+    userData.value.admin && roles.length > 0
+      ? (roleID.value = roles[roles.length - 1].id)
+      : (roleID.value = 0);
+    phone.value = res.phone;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 });
 </script>
 
@@ -159,12 +189,12 @@ onMounted(async () => {
                 type="text"
                 id="firstName"
                 placeholder="Иван"
-                v-model="name"
-                v-bind="nameAttrs"
+                v-model="firstName"
+                v-bind="firstNameAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               />
-              <span class="text-sm warning-text" v-if="errors.name">
-                {{ errors.name }}
+              <span class="text-sm warning-text" v-if="errors.firstName">
+                {{ errors.firstName }}
               </span>
             </div>
             <div>
@@ -177,15 +207,15 @@ onMounted(async () => {
                 type="text"
                 id="lastName"
                 placeholder="Иванов"
-                v-model="last_name"
-                v-bind="last_nameAttrs"
+                v-model="lastName"
+                v-bind="lastNameAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               />
-              <span class="text-sm warning-text" v-if="errors.last_name">
-                {{ errors.last_name }}
+              <span class="text-sm warning-text" v-if="errors.lastName">
+                {{ errors.lastName }}
               </span>
             </div>
-            <div>
+            <!-- <div>
               <label
                 for="username"
                 class="block text-sm font-medium text-main-text-color"
@@ -202,7 +232,7 @@ onMounted(async () => {
               <span class="text-sm warning-text" v-if="errors.username">
                 {{ errors.username }}
               </span>
-            </div>
+            </div> -->
             <div>
               <label
                 for="password"
@@ -239,8 +269,8 @@ onMounted(async () => {
               >
               <select
                 id="department"
-                v-model="department_id"
-                v-bind="department_idAttrs"
+                v-model="departmentID"
+                v-bind="departmentIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
                 <option value="" disabled>Выбрать</option>
@@ -252,8 +282,8 @@ onMounted(async () => {
                   {{ departmentItem.name }}
                 </option>
               </select>
-              <span class="text-sm warning-text" v-if="errors.department_id">
-                {{ errors.department_id }}
+              <span class="text-sm warning-text" v-if="errors.departmentID">
+                {{ errors.departmentID }}
               </span>
             </div>
             <div>
@@ -264,8 +294,8 @@ onMounted(async () => {
               >
               <select
                 id="position"
-                v-model="position_id"
-                v-bind="position_idAttrs"
+                v-model="positionID"
+                v-bind="positionIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
                 <option value="" disabled>Выбрать</option>
@@ -277,8 +307,8 @@ onMounted(async () => {
                   {{ positionItem.name }}
                 </option>
               </select>
-              <span class="text-sm warning-text" v-if="errors.position_id">
-                {{ errors.position_id }}
+              <span class="text-sm warning-text" v-if="errors.positionID">
+                {{ errors.positionID }}
               </span>
             </div>
             <div>
@@ -356,8 +386,8 @@ onMounted(async () => {
               >
               <select
                 id="role"
-                v-model="role_id"
-                v-bind="role_idAttrs"
+                v-model="roleID"
+                v-bind="roleIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
                 <option value="" disabled>Выбрать</option>
@@ -365,13 +395,13 @@ onMounted(async () => {
                   v-for="roleItem in globalStore.roles"
                   :key="roleItem.id"
                 >
-                  <option :value="roleItem.id" v-if="roleItem.id != 0">
+                  <option :value="roleItem.id">
                     {{ roleItem.name }}
                   </option>
                 </template>
               </select>
-              <span class="text-sm warning-text" v-if="errors.role_id">
-                {{ errors.role_id }}
+              <span class="text-sm warning-text" v-if="errors.roleID">
+                {{ errors.roleID }}
               </span>
             </div>
           </div>
