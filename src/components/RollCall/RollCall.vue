@@ -1,20 +1,21 @@
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useGlobalStore, useLoaderWatcher } from "@/stores/global";
 import { useAuthStore } from "@/stores/auth";
 import type { IWorkStatus } from "@/Interfaces/rollCall.interface";
 import { fetchRollCalls } from "./rollCall.data";
 import Pagination from "@/components/UI/Pagination/Pagination.vue";
+import DatePicker from "@/components/UI/DatePicker/DatePicker.vue";
 
 const globalStore = useGlobalStore();
 const authStore = useAuthStore();
 const rollCalls = ref<IWorkStatus[]>([]);
 const error = ref<string | null>(null);
 const total = ref(0);
-const totalPages = ref(6);
-const perPage = ref(10);
+const perPage = ref(6);
 const currentPage = ref(1);
-const hasMorePages = ref(true);
+const maxVisibleButtons = ref(4);
+const date = computed(() => globalStore.selectedDate);
 
 useLoaderWatcher();
 
@@ -23,9 +24,9 @@ onMounted(async () => {
   try {
     const response = await fetchRollCalls(
       currentPage.value,
-      totalPages.value,
+      perPage.value,
       null,
-      "",
+      date.value,
       null
     );
     rollCalls.value = response.data;
@@ -44,9 +45,28 @@ const handlePageChange = async (page: number) => {
   try {
     const response = await fetchRollCalls(
       currentPage.value,
-      totalPages.value,
+      perPage.value,
       null,
-      "",
+      date.value,
+      null
+    );
+    rollCalls.value = response.data;
+    total.value = response.count;
+  } catch (err) {
+    error.value = "Failed to fetch employees";
+  } finally {
+    globalStore.setLoading(false);
+  }
+};
+
+const fetchData = async () => {
+  globalStore.setLoading(true);
+  try {
+    const response = await fetchRollCalls(
+      currentPage.value,
+      perPage.value,
+      null,
+      date.value,
       null
     );
     rollCalls.value = response.data;
@@ -64,6 +84,13 @@ function formatTime(dateString: string): string {
   const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 }
+
+function resetFilter() {
+  globalStore.selectedDate = "";
+  localStorage.removeItem("selectedDate");
+}
+
+watch(date, fetchData);
 </script>
 <template>
   <div class="loader-wrap" v-if="globalStore.loader">
@@ -71,16 +98,10 @@ function formatTime(dateString: string): string {
   </div>
   <div class="all-users" v-else>
     <div class="section__content-filter">
-      <div class="section__content-filter-select">
-        <select id="countries" class="block w-full">
-          <option selected>Choose a country</option>
-          <option value="US">United States</option>
-        </select>
-      </div>
-      <div class="section__content-filter-input">
-        <img src="@/assets/img/magnify.svg" alt="" />
-        <input type="text" placeholder="Поиск..." />
-      </div>
+      <DatePicker />
+      <button class="button default" @click="resetFilter()">
+        Сбросить фильтр
+      </button>
     </div>
     <div class="all-users__content">
       <div class="section__content-table relative overflow-x-auto">
@@ -161,11 +182,10 @@ function formatTime(dateString: string): string {
         </table>
       </div>
       <Pagination
-        :totalPages="totalPages"
+        :maxVisibleButtons="maxVisibleButtons"
         :total="total"
         :perPage="perPage"
         :currentPage="currentPage"
-        :hasMorePages="hasMorePages"
         @pagechanged="handlePageChange"
       />
     </div>

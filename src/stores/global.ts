@@ -27,10 +27,16 @@ export const useGlobalStore = defineStore("global", {
     roles: [] as IRole[] | null,
     searchUsers: "",
     searchModers: "",
+    searchRollCalls: "",
+    rollCallInfo: {},
+    selectedDate: "",
   }),
   actions: {
     setLoading(status: boolean) {
       this.loader = status;
+    },
+    setSelectedDate(date: string) {
+      this.selectedDate = date;
     },
   },
 });

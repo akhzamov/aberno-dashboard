@@ -1,11 +1,6 @@
 <script lang="ts" setup>
-import { ref, computed, watch, defineEmits, defineProps } from "vue";
-
-const emit = defineEmits(["update:modelValue"]);
-
-const props = defineProps<{
-  modelValue: string;
-}>();
+import { ref, computed, watch, onMounted } from "vue";
+import { useGlobalStore } from "@/stores/global";
 
 const months = [
   "Январь",
@@ -21,13 +16,20 @@ const months = [
   "Ноябрь",
   "Декабрь",
 ];
+
+const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i);
+
 const weekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
 const selectedDate = ref<Date | null>(null);
 const showDatePicker = ref(false);
+const showMonthPicker = ref(false);
+const showYearPicker = ref(false);
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
+
+const globalStore = useGlobalStore();
 
 const formattedDate = computed(() => {
   if (!selectedDate.value) return "";
@@ -67,8 +69,10 @@ const nextMonth = () => {
 
 const selectDate = (day: number) => {
   selectedDate.value = new Date(currentYear.value, currentMonth.value, day);
+  const formatted = formattedDate.value;
+  globalStore.setSelectedDate(formatted);
+  localStorage.setItem("selectedDate", formatted);
   showDatePicker.value = false;
-  emit("update:modelValue", formattedDate.value);
 };
 
 const isSelectedDay = (day: number) => {
@@ -79,6 +83,31 @@ const isSelectedDay = (day: number) => {
     selectedDate.value.getFullYear() === currentYear.value
   );
 };
+
+const selectMonth = (monthIndex: number) => {
+  currentMonth.value = monthIndex;
+  showMonthPicker.value = false;
+  showYearPicker.value = false;
+};
+
+const selectYear = (year: number) => {
+  currentYear.value = year;
+  showYearPicker.value = false;
+  showMonthPicker.value = false;
+};
+
+onMounted(() => {
+  const storedDate = localStorage.getItem("selectedDate");
+  if (storedDate) {
+    const date = new Date(storedDate);
+    if (!isNaN(date.getTime())) {
+      selectedDate.value = date;
+      currentYear.value = date.getFullYear();
+      currentMonth.value = date.getMonth();
+      globalStore.setSelectedDate(storedDate);
+    }
+  }
+});
 
 watch(selectedDate, (newDate) => {
   console.log("Selected Date:", formattedDate.value);
@@ -104,7 +133,7 @@ watch(selectedDate, (newDate) => {
     </div>
     <input
       type="text"
-      v-model="formattedDate"
+      :value="formattedDate"
       class="bg-default-color border border-secondary-text-color text-main-text-color text-sm rounded-lg focus:ring-primary-color focus:border-primary-color block w-full pl-10 p-2.5"
       placeholder="Выберите дату"
       @focus="showDatePicker = true"
@@ -113,41 +142,71 @@ watch(selectedDate, (newDate) => {
     <!-- Calendar -->
     <div
       v-if="showDatePicker"
-      class="absolute z-10 mt-1 bg-default-color border border-secondary-text-color rounded-lg shadow-lg"
+      class="absolute z-10 mt-1 bg-default-color border border-secondary-text-color rounded-lg shadow-lg w-80 p-4"
     >
-      <div
-        class="flex justify-between p-2 bg-body-bg-color border-b border-secondary-text-color"
-      >
-        <button
-          @click="prevMonth"
-          class="px-2 py-1 text-main-text-color hover:bg-hover-bg-color rounded"
-        >
-          ←
-        </button>
-        <span>{{ months[currentMonth.value] }} {{ currentYear.value }}</span>
-        <button
-          @click="nextMonth"
-          class="px-2 py-1 text-main-text-color hover:bg-hover-bg-color rounded"
-        >
-          →
-        </button>
-      </div>
-      <div class="grid grid-cols-7 gap-1 p-2">
-        <div
-          v-for="day in weekDays"
-          :key="day"
-          class="text-center font-semibold text-secondary-text-color"
-        >
-          {{ day }}
+      <div class="flex justify-between items-center mb-2">
+        <button @click="prevMonth" class="text-main-text-color">←</button>
+        <div>
+          <span
+            @click="showMonthPicker = !showMonthPicker"
+            class="cursor-pointer"
+            >{{ months[currentMonth] }}</span
+          >
+          /
+          <span
+            @click="showYearPicker = !showYearPicker"
+            class="cursor-pointer"
+            >{{ currentYear }}</span
+          >
         </div>
+        <button @click="nextMonth" class="text-main-text-color">→</button>
+      </div>
+
+      <div v-if="showMonthPicker" class="grid grid-cols-3 gap-2 mb-2">
         <div
-          v-for="(day, index) in daysInMonth"
+          v-for="(month, index) in months"
           :key="index"
-          class="text-center p-2 cursor-pointer rounded hover:bg-hover-bg-color"
-          :class="{ 'bg-primary-color text-default-color': isSelectedDay(day) }"
-          @click="selectDate(day)"
+          class="text-center cursor-pointer p-1 rounded hover:bg-hover-bg-color"
+          @click="selectMonth(index)"
         >
-          {{ day }}
+          {{ month }}
+        </div>
+      </div>
+
+      <div v-if="showYearPicker" class="grid grid-cols-3 gap-2 mb-2">
+        <div
+          v-for="year in years"
+          :key="year"
+          class="text-center cursor-pointer p-1 rounded hover:bg-hover-bg-color"
+          @click="selectYear(year)"
+        >
+          {{ year }}
+        </div>
+      </div>
+
+      <div v-if="!showMonthPicker && !showYearPicker">
+        <div class="grid grid-cols-7 gap-1 text-center mb-2">
+          <div
+            v-for="day in weekDays"
+            :key="day"
+            class="text-secondary-text-color"
+          >
+            {{ day }}
+          </div>
+        </div>
+        <div class="grid grid-cols-7 gap-1 text-center">
+          <div
+            v-for="day in daysInMonth"
+            :key="day"
+            class="p-2 cursor-pointer rounded"
+            :class="{
+              'bg-primary-color text-default-color': isSelectedDay(day),
+              'text-gray-300': day <= 0,
+            }"
+            @click="selectDate(day)"
+          >
+            {{ day }}
+          </div>
         </div>
       </div>
     </div>

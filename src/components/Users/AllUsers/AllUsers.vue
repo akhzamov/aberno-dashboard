@@ -92,12 +92,6 @@ const handlePageChange = async (page: number) => {
   </div>
   <div class="all-users" v-else>
     <div class="section__content-filter">
-      <div class="section__content-filter-select">
-        <select id="countries" class="block w-full">
-          <option selected>Choose a country</option>
-          <option value="US">United States</option>
-        </select>
-      </div>
       <div class="section__content-filter-input">
         <img src="@/assets/img/magnify.svg" alt="" />
         <input
@@ -143,13 +137,13 @@ const handlePageChange = async (page: number) => {
             <tr v-for="employee in employees" :key="employee.id">
               <RouterLink
                 :to="{
-                  name: 'UsersEdit',
+                  name: 'UsersInfo',
                   params: {
                     id: employee.id,
                   },
                   state: {
                     userData: {
-                      title: 'Редактировать пользователя',
+                      title: 'Информация о пользователе',
                       admin: false,
                       id: employee.id,
                     },

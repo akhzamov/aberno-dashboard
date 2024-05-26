@@ -1,19 +1,13 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, reactive, watch } from "vue";
 import { useGlobalStore, useLoaderWatcher } from "@/stores/global";
-import { useAuthStore } from "@/stores/auth";
-import type { IWorkStatus } from "@/Interfaces/rollCall.interface";
+import type { IWorkDayResponse } from "@/Interfaces/rollCall.interface";
 import { fetchRollCalls } from "./info.data";
-import Pagination from "@/components/UI/Pagination/Pagination.vue";
 
 const globalStore = useGlobalStore();
-const rollCalls = ref<IWorkStatus[]>([]);
+const rollCallsData = ref<IWorkDayResponse>({});
 const error = ref<string | null>(null);
-const total = ref(0);
-const totalPages = ref(6);
-const perPage = ref(10);
-const currentPage = ref(1);
-const hasMorePages = ref(true);
+const rollCalls = computed(() => Object.entries(rollCallsData.value));
 
 interface IUserData {
   title: string;
@@ -22,7 +16,7 @@ interface IUserData {
 }
 
 const defaultUserData: IUserData = {
-  title: "Редактирование пользователя",
+  title: "Информация о пользователе",
   admin: false,
   id: 1,
 };
@@ -30,21 +24,123 @@ const defaultUserData: IUserData = {
 const userData = computed<IUserData>(() => {
   return window.history.state?.userData || defaultUserData;
 });
+const month = reactive([
+  {
+    id: 1,
+    title: "Январь",
+    value: "01",
+  },
+  {
+    id: 2,
+    title: "Февраль",
+    value: "02",
+  },
+  {
+    id: 3,
+    title: "Март",
+    value: "03",
+  },
+  {
+    id: 4,
+    title: "Апрель",
+    value: "04",
+  },
+  {
+    id: 5,
+    title: "Май",
+    value: "05",
+  },
+  {
+    id: 6,
+    title: "Июнь",
+    value: "06",
+  },
+  {
+    id: 7,
+    title: "Июль",
+    value: "07",
+  },
+  {
+    id: 8,
+    title: "Август",
+    value: "08",
+  },
+  {
+    id: 9,
+    title: "Сентябрь",
+    value: "09",
+  },
+  {
+    id: 10,
+    title: "Октябрь",
+    value: "10",
+  },
+  {
+    id: 11,
+    title: "Ноябрь",
+    value: "11",
+  },
+  {
+    id: 12,
+    title: "Декабрь",
+    value: "12",
+  },
+]);
+const selectedMonth = ref("");
+const year = reactive([
+  {
+    id: 1,
+    title: "2024",
+    value: "2024",
+  },
+  {
+    id: 2,
+    title: "2025",
+    value: "2025",
+  },
+  {
+    id: 3,
+    title: "2026",
+    value: "2026",
+  },
+  {
+    id: 4,
+    title: "2027",
+    value: "2027",
+  },
+  {
+    id: 5,
+    title: "2028",
+    value: "2028",
+  },
+  {
+    id: 6,
+    title: "2029",
+    value: "2029",
+  },
+  {
+    id: 7,
+    title: "2030",
+    value: "2030",
+  },
+]);
+const selectedYear = ref("");
+const currentMonth = new Date().getMonth() + 1;
 
 useLoaderWatcher();
 
 onMounted(async () => {
   globalStore.setLoading(true);
+  selectedMonth.value =
+    currentMonth < 10 ? "0" + currentMonth.toString() : currentMonth.toString();
+  selectedYear.value = new Date().getFullYear().toString();
   try {
     const response = await fetchRollCalls(
-      currentPage.value,
-      totalPages.value,
-      "",
+      selectedYear.value,
+      selectedMonth.value,
       userData.value.id
     );
-    rollCalls.value = response.data;
-
-    total.value = response.count;
+    rollCallsData.value = response;
   } catch (err) {
     error.value = "Failed to fetch employees";
   } finally {
@@ -52,24 +148,23 @@ onMounted(async () => {
   }
 });
 
-const handlePageChange = async (page: number) => {
+const fetchData = async () => {
   globalStore.setLoading(true);
-  currentPage.value = page;
   try {
     const response = await fetchRollCalls(
-      currentPage.value,
-      totalPages.value,
-      "",
+      selectedYear.value,
+      selectedMonth.value,
       userData.value.id
     );
-    rollCalls.value = response.data;
-    total.value = response.count;
+    rollCallsData.value = response;
   } catch (err) {
     error.value = "Failed to fetch employees";
   } finally {
     globalStore.setLoading(false);
   }
 };
+
+watch([selectedMonth, selectedYear], fetchData);
 
 function formatTime(dateString: string): string {
   const date = new Date(dateString);
@@ -82,14 +177,36 @@ function formatTime(dateString: string): string {
   <div class="loader-wrap" v-if="globalStore.loader">
     <Loader />
   </div>
-  <div class="all-users" v-else>
-    <div class="section__content-filter">
-      <div class="section__content-filter-input">
-        <img src="@/assets/img/magnify.svg" alt="" />
-        <input type="text" placeholder="Поиск..." />
+  <div class="user-roll-call" v-else>
+    <h3 class="user-roll-call__title">Период для просмотра</h3>
+    <div class="user-roll-call__selects flex space-x-4 mb-3 mt-3">
+      <div class="section__content-filter-select">
+        <select
+          id="location"
+          name="location"
+          class="block w-full"
+          v-model="selectedMonth"
+        >
+          <option v-for="item in month" :key="item.id" :value="item.value">
+            {{ item.title }}
+          </option>
+        </select>
+      </div>
+      <div class="section__content-filter-select">
+        <select
+          id="location"
+          name="location"
+          class="block w-full"
+          v-model="selectedYear"
+        >
+          <option v-for="item in year" :key="item.id" :value="item.value">
+            {{ item.title }}
+          </option>
+        </select>
       </div>
     </div>
-    <div class="all-users__content">
+    <h3 class="user-roll-call__title">История посещений (перекличка)</h3>
+    <div class="user-roll-call__content">
       <div class="section__content-table relative overflow-x-auto">
         <table class="w-full text-sm text-left rtl:text-right">
           <thead class="text-xs uppercase">
@@ -100,7 +217,7 @@ function formatTime(dateString: string): string {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="rollCallItem in rollCalls" :key="rollCallItem.id">
+            <tr v-for="([date, rollCallItem], index) in rollCalls" :key="index">
               <td class="px-6 py-4 statuses">
                 <span
                   class="section__content-status success"
@@ -134,11 +251,14 @@ function formatTime(dateString: string): string {
                 >
                   Выходной день
                 </span>
+                <span
+                  class="section__content-status danger"
+                  v-if="rollCallItem.status == null"
+                >
+                  Не работал
+                </span>
               </td>
-              <td class="px-6 py-4">
-                {{ formatTime(rollCallItem.created_at) }},
-                {{ new Date(rollCallItem.created_at).toLocaleDateString() }}
-              </td>
+              <td class="px-6 py-4">{{ date }}</td>
               <td class="px-6 py-4">
                 {{ rollCallItem.note ? rollCallItem.note : "Нет заметок" }}
               </td>
@@ -146,14 +266,6 @@ function formatTime(dateString: string): string {
           </tbody>
         </table>
       </div>
-      <Pagination
-        :totalPages="totalPages"
-        :total="total"
-        :perPage="perPage"
-        :currentPage="currentPage"
-        :hasMorePages="hasMorePages"
-        @pagechanged="handlePageChange"
-      />
     </div>
   </div>
 </template>
