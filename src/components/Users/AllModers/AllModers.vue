@@ -91,13 +91,6 @@ const handlePageChange = async (page: number) => {
   </div>
   <div class="all-moders">
     <div class="section__content-filter">
-      <div class="section__content-filter-select">
-        <select id="countries" class="block w-full">
-          <option value="" selected>Все</option>
-          <option value="A">Choose a country</option>
-          <option value="US">United States</option>
-        </select>
-      </div>
       <div class="section__content-filter-input">
         <img src="@/assets/img/magnify.svg" alt="" />
         <input
@@ -136,13 +129,13 @@ const handlePageChange = async (page: number) => {
             <tr class="" v-for="moder in moders" :key="moder.id">
               <RouterLink
                 :to="{
-                  name: 'UsersEdit',
+                  name: 'UsersInfo',
                   params: {
                     id: moder.id,
                   },
                   state: {
                     userData: {
-                      title: 'Редактировать модератора',
+                      title: 'Информация о модераторе',
                       admin: true,
                       id: moder.id,
                     },

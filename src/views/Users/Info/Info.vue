@@ -16,13 +16,6 @@ function formatTime(dateString: string): string {
     <h1 class="user-info__title title-black-gl">Информация о пользователе</h1>
     <div class="user-info__contents section__contents">
       <div class="user-info__content section__content">
-        <div class="section__content-tabs">
-          <ul class="section__content-tabs-list">
-            <li class="section__content-tabs-list-item active">
-              Период для просмотра <span></span>
-            </li>
-          </ul>
-        </div>
         <div class="section__content-views">
           <Info />
         </div>

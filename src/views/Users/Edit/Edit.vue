@@ -107,8 +107,8 @@ const onSubmit = handleSubmit(async (values) => {
     globalStore.setLoading(false);
     modalStore.successModal = true;
     modalStore.successModalText = userData.value.admin
-      ? "Новый модератор создан!"
-      : "Новый пользователь создан";
+      ? "Иформация модератора изменена!"
+      : "Иформация пользователя изменена!";
     setTimeout(() => {
       modalStore.successModal = false;
       modalStore.successModalText = "";
@@ -117,8 +117,7 @@ const onSubmit = handleSubmit(async (values) => {
     if (error?.response?.data?.detail === "Username is already taken") {
       globalStore.setLoading(false);
       modalStore.warningModal = true;
-      modalStore.warningModalText =
-        "Пользователь с таким логином уже существует";
+      modalStore.warningModalText = "Нельзя изментить логин";
       setTimeout(() => {
         modalStore.warningModal = false;
         modalStore.warningModalText = "";
@@ -126,7 +125,7 @@ const onSubmit = handleSubmit(async (values) => {
     } else {
       globalStore.setLoading(false);
       modalStore.dangerModal = true;
-      modalStore.dangerModalText = "Не удалось создать пользователя";
+      modalStore.dangerModalText = "Не удалось изменить пользователя";
       setTimeout(() => {
         modalStore.dangerModal = false;
         modalStore.dangerModalText = "";

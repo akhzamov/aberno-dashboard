@@ -22,3 +22,15 @@ export interface IWorkStatusResponse {
   count: number;
   data: IWorkStatus[];
 }
+
+export interface IWorkDay {
+  status: string | null;
+  note: string | null;
+  "on-work": string | null;
+  "leave-work": string | null;
+  "work-duration": string | null;
+}
+
+export interface IWorkDayResponse {
+  [date: string]: IWorkDay;
+}

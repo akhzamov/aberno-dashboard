@@ -7,5 +7,15 @@
     &-table {
       margin-top: 20px;
     }
+
+    & .section__content-views {
+      margin-top: 0;
+    }
+  }
+
+  &__detail {
+    &-edit-btn {
+      color: $primary-color;
+    }
   }
 }

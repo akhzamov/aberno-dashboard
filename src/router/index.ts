@@ -17,6 +17,7 @@ import Marketing from "@/views/Marketing/index.vue";
 import Production from "@/views/Production/index.vue";
 import Sales from "@/views/Sales/index.vue";
 import Stock from "@/views/Stock/index.vue";
+import NotFound from "@/views/NotFound/NotFound.vue";
 import { useAuthStore } from "@/stores/auth";
 
 const router = createRouter({
@@ -99,7 +100,7 @@ const router = createRouter({
       children: [
         {
           path: "",
-          name: "UserInfo",
+          name: "UsersInfo",
           component: UserInfo,
           meta: {
             guard: true,
@@ -246,6 +247,14 @@ const router = createRouter({
           },
         },
       ],
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "NotFound",
+      component: NotFound,
+      meta: {
+        guard: true,
+      },
     },
   ],
 });
