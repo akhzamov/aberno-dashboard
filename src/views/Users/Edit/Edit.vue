@@ -44,17 +44,13 @@ const schema = yup.object({
     .string()
     .required("Введите фамилию")
     .min(3, "Фамилия не должна быть меньше 3-х символов"),
-  username: yup
-    .string()
-    .required("Введите логин")
-    .min(5, "Логин не должен быть меньше 5-ти символов")
-    .nullable(),
+  username: yup.string(),
   password: yup
     .string()
     .notRequired()
     .min(6, "Пароль не должен быть меньше 6-ти символов"),
-  departmentID: yup.number().nullable().required("Выберите отдел").default(1),
-  positionID: yup.number().nullable().required("Выберите должность").default(1),
+  departmentID: yup.number().nullable().required("Выберите отдел").default(7),
+  positionID: yup.number().nullable().required("Выберите должность").default(5),
   roleID: yup.number().nullable().required("Выберите роль").default(0),
   phone: yup
     .string()
@@ -214,24 +210,6 @@ onMounted(async () => {
                 {{ errors.lastName }}
               </span>
             </div>
-            <!-- <div>
-              <label
-                for="username"
-                class="block text-sm font-medium text-main-text-color"
-                >Логин</label
-              >
-              <input
-                type="text"
-                id="username"
-                placeholder="ivanov"
-                v-model="username"
-                v-bind="usernameAttrs"
-                class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
-              />
-              <span class="text-sm warning-text" v-if="errors.username">
-                {{ errors.username }}
-              </span>
-            </div> -->
             <div>
               <label
                 for="password"
@@ -328,55 +306,6 @@ onMounted(async () => {
                 {{ errors.phone }}
               </span>
             </div>
-            <!-- <div class="hidden items-center space-x-4">
-              <div>
-                <label
-                  for="workStart"
-                  class="block text-sm font-medium text-main-text-color"
-                  >Время работы</label
-                >
-                <select
-                  id="workStart"
-                  v-model="form.workStart"
-                  class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
-                >
-                  <option value="" disabled>Выбрать</option>
-                  <option value="8:00">8:00</option>
-                  <option value="9:00">9:00</option>
-                  <option value="10:00">10:00</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  for="workEnd"
-                  class="block text-sm font-medium text-main-text-color"
-                  >До</label
-                >
-                <select
-                  id="workEnd"
-                  v-model="form.workEnd"
-                  class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
-                >
-                  <option value="" disabled>Выбрать</option>
-                  <option value="17:00">17:00</option>
-                  <option value="18:00">18:00</option>
-                  <option value="19:00">19:00</option>
-                </select>
-              </div>
-              <div class="flex justify-center items-center h-full">
-                <input
-                  type="checkbox"
-                  id="overtime"
-                  v-model="form.overtime"
-                  class="h-4 w-4 text-primary-color border-gray-300 rounded focus:ring-primary-color"
-                />
-                <label
-                  for="overtime"
-                  class="ml-2 block text-sm text-main-text-color"
-                  >Сверхурочка</label
-                >
-              </div>
-            </div> -->
             <div v-if="userData.admin">
               <label
                 for="role"

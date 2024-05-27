@@ -155,10 +155,12 @@ const handlePageChange = async (page: number) => {
               </th>
               <th scope="row" class="px-6 py-4 font-medium">
                 {{
-                  moder.created_by.name == "Dev" &&
-                  moder.created_by.last_name == null
-                    ? "Musait Technologies"
-                    : `${moder.created_by.name} ${moder.created_by.last_name}`
+                  moder.created_by
+                    ? moder.created_by.name == "Dev" &&
+                      moder.created_by.last_name == null
+                      ? "Musait Technologies"
+                      : `${moder.created_by.name} ${moder.created_by.last_name}`
+                    : "Нет"
                 }}
               </th>
               <th scope="row" class="px-6 py-4 font-medium">
