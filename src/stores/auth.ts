@@ -83,8 +83,9 @@ export const useAuthStore = defineStore("auth", {
         this.loader = false;
         const authGuard = router.currentRoute.value.meta.guard;
         if (
-          (authGuard && !this.user.user.is_active && !this.isSuperAdmin) ||
-          !this.isAdmin
+          authGuard &&
+          !this.user.user.is_active &&
+          (!this.isSuperAdmin || !this.isAdmin)
         ) {
           router.push("/authorization");
           this.dangerAlert = true;
