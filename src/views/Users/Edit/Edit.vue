@@ -44,13 +44,16 @@ const schema = yup.object({
     .string()
     .required("Введите фамилию")
     .min(3, "Фамилия не должна быть меньше 3-х символов"),
-  username: yup.string(),
   password: yup
     .string()
     .notRequired()
     .min(6, "Пароль не должен быть меньше 6-ти символов"),
-  departmentID: yup.number().nullable().required("Выберите отдел").default(7),
-  positionID: yup.number().nullable().required("Выберите должность").default(5),
+  passwordConfirm: yup
+    .string()
+    .notRequired()
+    .oneOf([yup.ref("password")], "Пароль не совподает"),
+  departmentID: yup.number().nullable().required("Выберите отдел"),
+  positionID: yup.number().nullable().required("Выберите должность"),
   roleID: yup.number().nullable().required("Выберите роль").default(0),
   phone: yup
     .string()
@@ -61,8 +64,8 @@ const schema = yup.object({
 interface ISchemaForm {
   firstName: string;
   lastName: string;
-  username: string;
   password: string;
+  passwordConfirm: string;
   departmentID: number | null;
   positionID: number | null;
   roleID: number | null;
@@ -74,8 +77,8 @@ const { handleSubmit, defineField, errors } = useForm<ISchemaForm>({
 });
 const [firstName, firstNameAttrs] = defineField("firstName");
 const [lastName, lastNameAttrs] = defineField("lastName");
-const [username, usernameAttrs] = defineField("username");
 const [password, passwordAttrs] = defineField("password");
+const [passwordConfirm, passwordConfirmAttrs] = defineField("passwordConfirm");
 const [departmentID, departmentIDAttrs] = defineField("departmentID");
 const [positionID, positionIDAttrs] = defineField("positionID");
 const [roleID, roleIDAttrs] = defineField("roleID");
@@ -85,12 +88,11 @@ const onSubmit = handleSubmit(async (values) => {
   const submitForm: IEmployeeData = {
     name: values.firstName,
     last_name: values.lastName,
-    username: values.username,
     password: values.password,
-    password_confirmation: values.password,
+    password_confirmation: values.passwordConfirm,
     department_id: values.departmentID ?? 1,
     position_id: values.positionID ?? 1,
-    role_id: userData.value.admin ? Number(values.roleID) : 0,
+    role_id: authStore.isSuperAdmin ? Number(values.roleID) : 0,
     phone: values.phone,
     organization_id: authStore.organizationID ?? 1,
   };
@@ -140,7 +142,6 @@ onMounted(async () => {
     const roles = res.user.roles;
     firstName.value = res.user.name;
     lastName.value = res.user.last_name ? res.user.last_name : "";
-    username.value = res.user.username;
     res.department
       ? (departmentID.value = res.department.id)
       : (departmentID.value = 2);
@@ -228,6 +229,24 @@ onMounted(async () => {
                 {{ errors.password }}
               </span>
             </div>
+            <div>
+              <label
+                for="passwordConfirm"
+                class="block text-sm font-medium text-main-text-color"
+                >Повторить пароль</label
+              >
+              <input
+                type="text"
+                id="passwordConfirm"
+                placeholder="пароль"
+                v-model="passwordConfirm"
+                v-bind="passwordConfirmAttrs"
+                class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
+              />
+              <span class="text-sm warning-text" v-if="errors.passwordConfirm">
+                {{ errors.passwordConfirm }}
+              </span>
+            </div>
           </div>
 
           <h2 class="text-xl font-semibold text-main-text-color mb-4">
@@ -250,7 +269,7 @@ onMounted(async () => {
                 v-bind="departmentIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
-                <option value="" disabled>Выбрать</option>
+                <option :value="undefined" disabled>Выбрать</option>
                 <option
                   :value="departmentItem.id"
                   v-for="departmentItem in globalStore.departments"
@@ -275,7 +294,7 @@ onMounted(async () => {
                 v-bind="positionIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
-                <option value="" disabled>Выбрать</option>
+                <option :value="undefined" disabled>Выбрать</option>
                 <option
                   :value="positionItem.id"
                   v-for="positionItem in globalStore.positions"
@@ -306,7 +325,7 @@ onMounted(async () => {
                 {{ errors.phone }}
               </span>
             </div>
-            <div v-if="userData.admin">
+            <div v-if="authStore.isSuperAdmin">
               <label
                 for="role"
                 class="block text-sm font-medium text-main-text-color"
@@ -318,7 +337,7 @@ onMounted(async () => {
                 v-bind="roleIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
-                <option value="" disabled>Выбрать</option>
+                <option :value="undefined" disabled>Выбрать</option>
                 <template
                   v-for="roleItem in globalStore.roles"
                   :key="roleItem.id"

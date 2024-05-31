@@ -13,6 +13,7 @@ export interface IUser {
   name: string;
   last_name: string | null;
   username: string;
+  employee_number: string;
   created_at: string;
   updated_at: string;
   is_active: boolean;
@@ -23,6 +24,7 @@ export interface IUser {
 export interface IPosition {
   id: number;
   name: string;
+  department_id: number;
 }
 
 export interface ISetting {
@@ -96,7 +98,6 @@ export interface IEmployeeResponse {
 export interface IEmployeeData {
   name: string;
   last_name: string;
-  username: string;
   password: string;
   password_confirmation: string;
   position_id: number;
@@ -108,7 +109,7 @@ export interface IEmployeeData {
 
 export interface ICurrentUser {
   id: number;
-  username: string;
+  employee_number: string;
   is_active: boolean;
   created_at: string;
   name: string;

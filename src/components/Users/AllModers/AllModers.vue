@@ -118,7 +118,7 @@ const handlePageChange = async (page: number) => {
             <tr>
               <th scope="col" class="px-6 py-3">Имя администратора</th>
               <th scope="col" class="px-6 py-3">Cоздатель</th>
-              <th scope="col" class="px-6 py-3">Логин</th>
+              <th scope="col" class="px-6 py-3">Табельный номер</th>
               <th scope="col" class="px-6 py-3">Статус</th>
               <th scope="col" class="px-6 py-3">Роль</th>
               <th scope="col" class="px-6 py-3">Дата создания</th>
@@ -126,6 +126,11 @@ const handlePageChange = async (page: number) => {
             </tr>
           </thead>
           <tbody>
+            <tr v-if="moders.length == 0">
+              <th scope="row" class="px-6 py-4 font-medium flex flex-col">
+                Ничего не найдено
+              </th>
+            </tr>
             <tr class="" v-for="moder in moders" :key="moder.id">
               <RouterLink
                 :to="{
@@ -142,29 +147,49 @@ const handlePageChange = async (page: number) => {
                   },
                 }"
               />
-              <th scope="row" class="px-6 py-4 font-medium flex flex-col">
-                {{
-                  moder.user.name == "Dev" && moder.user.last_name == null
-                    ? "Musait Technologies"
-                    : `${moder.user.name} ${moder.user.last_name}`
-                }}
-                <span>
-                  {{ moder.department ? moder.department.name : " " }}
-                  {{ moder.position ? moder.position.name : " " }}
-                </span>
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium flex flex-row items-center gap-3"
+              >
+                <img
+                  src="@/assets/img/user-avatar.svg"
+                  alt=""
+                  class="w-12 h-12"
+                  v-if="moder.user.is_active"
+                />
+                <img
+                  src="@/assets/img/user-avatar-red.svg"
+                  alt=""
+                  class="w-12 h-12"
+                  v-if="!moder.user.is_active"
+                />
+                <strong class="flex flex-col">
+                  {{ `${moder.user.name} ${moder.user.last_name}` }}
+                  <span>
+                    {{ moder.department ? moder.department.name : " " }}
+                    {{ moder.position ? moder.position.name : " " }}
+                  </span>
+                </strong>
               </th>
               <th scope="row" class="px-6 py-4 font-medium">
                 {{
                   moder.created_by
-                    ? moder.created_by.name == "Dev" &&
-                      moder.created_by.last_name == null
-                      ? "Musait Technologies"
-                      : `${moder.created_by.name} ${moder.created_by.last_name}`
+                    ? moder.created_by.name != ""
+                      ? moder.created_by.name
+                      : "не."
                     : "Нет"
+                }}
+
+                {{
+                  moder.created_by
+                    ? moder.created_by.last_name != ""
+                      ? moder.created_by.last_name
+                      : "не."
+                    : ""
                 }}
               </th>
               <th scope="row" class="px-6 py-4 font-medium">
-                {{ moder.user.username }}
+                {{ moder.user.employee_number }}
               </th>
               <td class="px-6 py-4 statuses">
                 <span

@@ -42,28 +42,28 @@ const schema = yup.object({
     .string()
     .required("Введите фамилию")
     .min(3, "Фамилия не должна быть меньше 3-х символов"),
-  username: yup
-    .string()
-    .required("Введите логин")
-    .min(5, "Логин не должен быть меньше 5-ти символов"),
   password: yup
     .string()
     .required("Введите пароль")
     .min(6, "Пароль не должен быть меньше 6-ти символов"),
-  departmentID: yup.number().nullable().required("Выберите отдел").default(1),
-  positionID: yup.number().nullable().required("Выберите должность").default(1),
+  passwordConfirm: yup
+    .string()
+    .required("Повторите пароль")
+    .oneOf([yup.ref("password")], "Пароль не совподает"),
+  departmentID: yup.number().nullable().required("Выберите отдел"),
+  positionID: yup.number().nullable().required("Выберите должность"),
   roleID: yup.number().nullable().required("Выберите роль").default(0),
   phone: yup
     .string()
     .required("Введите номер телефона")
-    .min(6, "Номер телефона не должен быть меньше 6-ти символов"),
+    .min(13, "Номер телефона не должен быть меньше 13-ти символов"),
 });
 
 interface ISchemaForm {
   firstName: string;
   lastName: string;
-  username: string;
   password: string;
+  passwordConfirm: string;
   departmentID: number | null;
   positionID: number | null;
   roleID: number | null;
@@ -76,8 +76,8 @@ const { handleSubmit, defineField, errors } = useForm<ISchemaForm>({
 
 const [firstName, firstNameAttrs] = defineField("firstName");
 const [lastName, lastNameAttrs] = defineField("lastName");
-const [username, usernameAttrs] = defineField("username");
 const [password, passwordAttrs] = defineField("password");
+const [passwordConfirm, passwordConfirmAttrs] = defineField("passwordConfirm");
 const [departmentID, departmentIDAttrs] = defineField("departmentID");
 const [positionID, positionIDAttrs] = defineField("positionID");
 const [roleID, roleIDAttrs] = defineField("roleID");
@@ -87,9 +87,8 @@ const onSubmit = handleSubmit(async (values) => {
   const submitForm: IEmployeeData = {
     name: values.firstName,
     last_name: values.lastName,
-    username: values.username,
     password: values.password,
-    password_confirmation: values.password,
+    password_confirmation: values.passwordConfirm,
     department_id: values.departmentID ?? 1,
     position_id: values.positionID ?? 1,
     role_id: userData.value.admin ? Number(values.roleID) : 0,
@@ -215,24 +214,6 @@ onMounted(async () => {
             </div>
             <div>
               <label
-                for="username"
-                class="block text-sm font-medium text-main-text-color"
-                >Логин</label
-              >
-              <input
-                type="text"
-                id="username"
-                placeholder="ivanov"
-                v-model="username"
-                v-bind="usernameAttrs"
-                class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
-              />
-              <span class="text-sm warning-text" v-if="errors.username">{{
-                errors.username
-              }}</span>
-            </div>
-            <div>
-              <label
                 for="password"
                 class="block text-sm font-medium text-main-text-color"
                 >Пароль</label
@@ -248,6 +229,26 @@ onMounted(async () => {
               <span class="text-sm warning-text" v-if="errors.password">{{
                 errors.password
               }}</span>
+            </div>
+            <div>
+              <label
+                for="password"
+                class="block text-sm font-medium text-main-text-color"
+                >Подтверждение пароля</label
+              >
+              <input
+                type="password"
+                id="passwordConfirm"
+                placeholder="повторите пароль"
+                v-model="passwordConfirm"
+                v-bind="passwordConfirmAttrs"
+                class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
+              />
+              <span
+                class="text-sm warning-text"
+                v-if="errors.passwordConfirm"
+                >{{ errors.passwordConfirm }}</span
+              >
             </div>
           </div>
 
@@ -271,7 +272,7 @@ onMounted(async () => {
                 v-bind="departmentIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
-                <option value="" disabled>Выбрать</option>
+                <option :value="undefined" disabled selected>Выбрать</option>
                 <option
                   :value="departmentItem.id"
                   v-for="departmentItem in globalStore.departments"
@@ -296,14 +297,18 @@ onMounted(async () => {
                 v-bind="positionIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
-                <option value="" disabled>Выбрать</option>
-                <option
-                  :value="positionItem.id"
+                <option :value="undefined" disabled selected>Выбрать</option>
+                <template
                   v-for="positionItem in globalStore.positions"
                   :key="positionItem.id"
                 >
-                  {{ positionItem.name }}
-                </option>
+                  <option
+                    :value="positionItem.id"
+                    v-if="positionItem.department_id == departmentID"
+                  >
+                    {{ positionItem.name }}
+                  </option>
+                </template>
               </select>
               <span class="text-sm warning-text" v-if="errors.positionID">{{
                 errors.positionID
@@ -327,11 +332,11 @@ onMounted(async () => {
                 errors.phone
               }}</span>
             </div>
-            <div v-if="userData.admin">
+            <div v-if="authStore.isSuperAdmin && userData.admin">
               <label
                 for="role"
                 class="block text-sm font-medium text-main-text-color"
-                >Должность Модератора</label
+                >Должность Пользователя</label
               >
               <select
                 id="role"
@@ -339,12 +344,35 @@ onMounted(async () => {
                 v-bind="roleIDAttrs"
                 class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color border-custom-color"
               >
-                <option value="" disabled>Выбрать</option>
+                <option :value="undefined" disabled selected>Выбрать</option>
                 <template
                   v-for="roleItem in globalStore.roles"
                   :key="roleItem.id"
                 >
-                  <option :value="roleItem.id" v-if="roleItem.id != 0">
+                  <option
+                    :value="roleItem.id"
+                    v-if="roleItem.id == 0 && !userData.admin"
+                  >
+                    {{ roleItem.name }}
+                  </option>
+                  <option
+                    :value="roleItem.id"
+                    v-if="
+                      roleItem.id == 1 &&
+                      authStore.isSuperAdmin &&
+                      userData.admin
+                    "
+                  >
+                    {{ roleItem.name }}
+                  </option>
+                  <option
+                    :value="roleItem.id"
+                    v-if="
+                      roleItem.id == 2 &&
+                      authStore.isSuperAdmin &&
+                      userData.admin
+                    "
+                  >
                     {{ roleItem.name }}
                   </option>
                 </template>

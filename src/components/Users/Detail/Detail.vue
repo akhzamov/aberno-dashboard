@@ -71,7 +71,9 @@ onMounted(async () => {
           }`
         }}
       </li>
-      <li><strong>Логин:</strong> {{ user.user?.username }}</li>
+      <li>
+        <strong>Табельный номер:</strong> {{ user.user?.employee_number }}
+      </li>
       <li>
         <strong>Модератор: </strong>
         {{ `${user.created_by?.name} ${user.created_by?.last_name}` }}

@@ -1,4 +1,4 @@
-export const baseUrl = "https://api.aberno-app.com/api";
+export const baseUrl = "https://dev.api.aberno-app.com/api";
 export const defHeader = {
   Accept: "application/json",
   "Content-Type": "application/json",

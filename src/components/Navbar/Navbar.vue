@@ -16,14 +16,10 @@ const user = computed(() => authStore.user.user);
         <img src="@/assets/img/user-avatar.svg" alt="" />
       </div>
       <div class="nav__user-right">
-        <h3 class="nav__user-name">
-          {{
-            user.username == "dev"
-              ? "Musait Technologies"
-              : `${user.name} ${user.last_name}`
-          }}
-        </h3>
-        <p class="nav__user-login">Логин: {{ user.username }}</p>
+        <h3 class="nav__user-name">{{ user?.name }} {{ user?.last_name }}</h3>
+        <p class="nav__user-login">
+          Табельный номер: {{ user?.employee_number }}
+        </p>
       </div>
     </div>
   </nav>

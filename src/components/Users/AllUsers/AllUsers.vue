@@ -121,8 +121,9 @@ const handlePageChange = async (page: number) => {
           <thead class="text-xs uppercase">
             <tr>
               <th scope="col" class="px-6 py-3">Имя пользователя</th>
+              <th scope="col" class="px-6 py-3">Создатель</th>
+              <th scope="col" class="px-6 py-3">Табельный номер</th>
               <th scope="col" class="px-6 py-3">Статус</th>
-              <th scope="col" class="px-6 py-3">Модератор</th>
               <th scope="col" class="px-6 py-3">Дата создания</th>
               <th scope="col" class="px-6 py-3">Дата изменение</th>
             </tr>
@@ -150,16 +151,43 @@ const handlePageChange = async (page: number) => {
                   },
                 }"
               />
-              <th scope="row" class="px-6 py-4 font-medium flex flex-col">
-                {{ employee.user.name }} {{ employee.user.last_name }}
-                <span>
-                  {{ employee.department.name }}
-                  {{
-                    employee.position ? employee.position.name : "Не определено"
-                  }}
-                </span>
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium flex items-center gap-3"
+              >
+                <img
+                  src="@/assets/img/user-avatar.svg"
+                  alt=""
+                  class="w-12 h-12"
+                  v-if="employee.user.is_active"
+                />
+                <img
+                  src="@/assets/img/user-avatar-red.svg"
+                  alt=""
+                  class="w-12 h-12"
+                  v-if="!employee.user.is_active"
+                />
+                <strong class="flex flex-col">
+                  {{ `${employee.user.name} ${employee.user.last_name}` }}
+                  <span>
+                    {{ employee.department ? employee.department.name : " " }}
+                    {{ employee.position ? employee.position.name : " " }}
+                  </span>
+                </strong>
               </th>
-
+              <th scope="row" class="px-6 py-4 font-medium">
+                {{
+                  employee.created_by
+                    ? employee.created_by.name == "Dev" &&
+                      employee.created_by.last_name == null
+                      ? "Musait Technologies"
+                      : `${employee.created_by.name} ${employee.created_by.last_name}`
+                    : "Нет"
+                }}
+              </th>
+              <td class="px-6 py-4">
+                {{ employee.user.employee_number }}
+              </td>
               <td class="px-6 py-4 statuses">
                 <span
                   class="section__content-status success"
@@ -172,14 +200,7 @@ const handlePageChange = async (page: number) => {
                   >Удален</span
                 >
               </td>
-              <td class="px-6 py-4">
-                {{
-                  employee.created_by.name == "Dev" &&
-                  employee.created_by.last_name == null
-                    ? "Musait Technologies"
-                    : `${employee.created_by.name} ${employee.created_by.last_name}`
-                }}
-              </td>
+
               <td class="px-6 py-4">
                 {{ new Date(employee.created_at).toLocaleDateString() }}
               </td>

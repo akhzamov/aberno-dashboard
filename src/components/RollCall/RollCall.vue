@@ -115,6 +115,11 @@ watch(date, fetchData);
             </tr>
           </thead>
           <tbody>
+            <tr v-if="rollCalls.length == 0">
+              <th scope="row" class="px-6 py-4 font-medium flex flex-col">
+                Ничего не найдено
+              </th>
+            </tr>
             <tr v-for="rollCallItem in rollCalls" :key="rollCallItem.id">
               <th scope="row" class="px-6 py-4 font-medium flex flex-col">
                 {{
